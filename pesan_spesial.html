@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pesan Unrukmu</title>
+    <!-- Google Fonts & Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Plus+Jakarta+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        serif: ['"Cormorant Garamond"', 'serif'],
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        amberCustom: {
+                            50: '#fffbeb',
+                            100: '#fef3c7',
+                            80: '#f59e0b',
+                            900: '#78350f',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #0d0f12;
+            color: #e2e8f0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Ambient background glow */
+        .ambient-glow {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(217, 119, 6, 0.08) 0%, rgba(15, 23, 42, 0) 70%);
+            z-index: 0;
+            pointer-events: none;
+            border-radius: 50%;
+            animation: pulse-slow 8s infinite alternate ease-in-out;
+        }
+
+        @keyframes pulse-slow {
+            0% { transform: translate(-50%, -50%) scale(0.9); opacity: 0.5; }
+            100% { transform: translate(-50%, -50%) scale(1.1); opacity: 0.8; }
+        }
+
+        /* Typing effect cursor */
+        .typing-cursor::after {
+            content: '|';
+            animation: blink 1s infinite;
+            color: #f59e0b;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        /* Envelope / Card Flip styles */
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+
+        .card-inner {
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-style: preserve-3d;
+        }
+
+        .card-inner.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-front, .card-back {
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+
+        .card-back {
+            transform: rotateY(180deg);
+        }
+
+        /* Floating particles */
+        .particle {
+            position: absolute;
+            background: rgba(245, 158, 11, 0.3);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: float 12s infinite linear;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(100vh) scale(0); opacity: 0; }
+            50% { opacity: 0.6; }
+            100% { transform: translateY(-20vh) scale(1); opacity: 0; }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 sm:p-6 relative">
+
+    <!-- Background Ambient Light -->
+    <div class="ambient-glow"></div>
+    <div id="particle-container" class="fixed inset-0 pointer-events-none z-0"></div>
+
+    <!-- Main Container -->
+    <main class="w-full max-w-lg z-10 relative">
+
+        <div class="perspective-1000 w-full min-h-[420px] sm:min-h-[460px]">
+            <div id="interactiveCard" class="card-inner relative w-full h-full min-h-[420px] sm:min-h-[460px]">
+
+                <!-- FRONT SIDE: Cover / Initial State -->
+                <div class="card-front absolute inset-0 bg-slate-900/80 backdrop-blur-md border border-slate-800 rounded-3xl p-8 flex flex-col justify-between items-center text-center shadow-2xl transition-all hover:border-amber-500/30">
+                    <div class="flex-1 flex flex-col justify-center items-center">
+                        <!-- Icon Header -->
+                        <div class="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mb-6 shadow-inner">
+                            <i class="fa-regular fa-envelope-open text-amber-500 text-2xl"></i>
+                        </div>
+
+                        <!-- Intro Text -->
+                        <p class="text-xs uppercase tracking-[0.2em] text-amber-500/80 font-medium mb-2">Ada sesuatu untukmu</p>
+                        <h1 class="font-serif text-2xl sm:text-3xl text-slate-100 font-light italic mb-4">
+                            "Kadang hal yang paling sederhana adalah yang paling sulit diungkapkan."
+                        </h1>
+                        <p class="text-sm text-slate-400 font-light leading-relaxed max-w-xs">
+                            Luangkan waktu sejenak, ada satu hal kecil yang ingin aku sampaikan padamu.
+                        </p>
+                    </div>
+
+                    <!-- Action Button -->
+                    <button onclick="revealMessage()" class="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-medium text-sm tracking-wide shadow-lg shadow-amber-500/10 hover:shadow-amber-500/25 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 flex items-center justify-center space-x-2 group">
+                        <span>Buka Pesan Ini</span>
+                        <i class="fa-solid fa-arrow-right text-xs group-hover:translate-x-1 transition-transform"></i>
+                    </button>
+                </div>
+
+                <!-- BACK SIDE: Message Reveal -->
+                <div class="card-back absolute inset-0 bg-slate-900/90 backdrop-blur-xl border border-amber-500/30 rounded-3xl p-8 flex flex-col justify-between items-center text-center shadow-2xl">
+                    <div class="w-full h-full flex flex-col justify-center items-center">
+                        
+                        <!-- Subtitle -->
+                        <div class="opacity-0 transition-opacity duration-700" id="messageHeader">
+                            <span class="text-xs uppercase tracking-[0.3em] text-amber-500/70 font-medium">Catatan Kecil</span>
+                        </div>
+
+                        <!-- Main Core Message (Interactive Typing Area) -->
+                        <div class="my-auto py-6 px-4">
+                            <h2 id="typedText" class="font-serif text-3xl sm:text-4xl text-amber-100 leading-snug font-normal italic min-h-[100px] flex items-center justify-center">
+                                <!-- Text will be dynamically injected here -->
+                            </h2>
+                        </div>
+
+                        <!-- Subtle Supporting Message -->
+                        <div id="subMessage" class="opacity-0 transform translate-y-4 transition-all duration-1000 ease-out">
+                            <p class="text-xs text-slate-400 font-light leading-relaxed max-w-xs italic border-t border-slate-800/80 pt-4">
+                                Gengsi seringkali menghalangi kita, padahal satu langkah kecil bisa menyembuhkan banyak hal.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Bottom Action / Reset -->
+                    <div id="cardFooter" class="opacity-0 transition-opacity duration-500 w-full pt-4">
+                        <button onclick="resetCard()" class="text-xs text-slate-500 hover:text-amber-400 transition-colors flex items-center justify-center space-x-1 mx-auto">
+                            <i class="fa-solid fa-rotate-left text-[10px]"></i>
+                            <span>Baca Ulang</span>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Footer watermark -->
+        <p class="text-center text-slate-600 text-xs mt-8 font-light tracking-wider">
+            Disampaikan dengan ketulusan ✨
+        </p>
+    </main>
+
+    <script>
+        // Main Message Config
+        const primaryMessage = "minta maaf itu ga susah kok";
+        let isTyping = false;
+
+        // Floating particles creator
+        function createParticles() {
+            const container = document.getElementById('particle-container');
+            const particleCount = 15;
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                
+                // Random position and size
+                const size = Math.random() * 4 + 2;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.left = `${Math.random() * 100}%`;
+                
+                // Random animation delay and duration
+                particle.style.animationDelay = `${Math.random() * 8}s`;
+                particle.style.animationDuration = `${Math.random() * 8 + 8}s`;
+                
+                container.appendChild(particle);
+            }
+        }
+
+        // Card Flip & Message Reveal Trigger
+        function revealMessage() {
+            const card = document.getElementById('interactiveCard');
+            card.classList.add('flipped');
+
+            // Delay typing animation until card flip completes
+            setTimeout(() => {
+                document.getElementById('messageHeader').classList.remove('opacity-0');
+                startTypingEffect();
+            }, 600);
+        }
+
+        // Typing effect algorithm
+        function startTypingEffect() {
+            if (isTyping) return;
+            isTyping = true;
+
+            const textContainer = document.getElementById('typedText');
+            textContainer.innerHTML = '';
+            textContainer.classList.add('typing-cursor');
+
+            let index = 0;
+
+            function typeChar() {
+                if (index < primaryMessage.length) {
+                    textContainer.textContent += primaryMessage.charAt(index);
+                    index++;
+                    // Variable speed for realistic typing effect
+                    const delay = Math.random() * 80 + 70;
+                    setTimeout(typeChar, delay);
+                } else {
+                    // Typing completed
+                    textContainer.classList.remove('typing-cursor');
+                    showSecondaryElements();
+                }
+            }
+
+            typeChar();
+        }
+
+        // Reveal additional elements after typing
+        function showSecondaryElements() {
+            const subMsg = document.getElementById('subMessage');
+            const footer = document.getElementById('cardFooter');
+
+            subMsg.classList.remove('opacity-0', 'translate-y-4');
+            subMsg.classList.add('opacity-100', 'translate-y-0');
+
+            setTimeout(() => {
+                footer.classList.remove('opacity-0');
+                footer.classList.add('opacity-100');
+            }, 500);
+        }
+
+        // Reset Card state
+        function resetCard() {
+            const card = document.getElementById('interactiveCard');
+            const textContainer = document.getElementById('typedText');
+            const subMsg = document.getElementById('subMessage');
+            const footer = document.getElementById('cardFooter');
+            const header = document.getElementById('messageHeader');
+
+            // Reset Card View
+            card.classList.remove('flipped');
+            isTyping = false;
+
+            // Reset Text States
+            setTimeout(() => {
+                textContainer.textContent = '';
+                subMsg.classList.add('opacity-0', 'translate-y-4');
+                subMsg.classList.remove('opacity-100', 'translate-y-0');
+                footer.classList.add('opacity-0');
+                header.classList.add('opacity-0');
+            }, 800);
+        }
+
+        // Initialize particles on load
+        window.onload = function() {
+            createParticles();
+        }
+    </script>
+</body>
+</html>
